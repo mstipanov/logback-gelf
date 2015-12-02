@@ -6,10 +6,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
 import com.github.pukkaone.gelf.protocol.GelfMessage;
 import org.slf4j.Marker;
-
 import java.util.Map;
 
-public class DefaultGelfMessageFactory implements GelfMessageFactory{
+/**
+ * Default message factory implementation.
+ */
+public class DefaultGelfMessageFactory implements GelfMessageFactory {
 
     private PatternLayout shortPatternLayout;
     private PatternLayout fullPatternLayout;
@@ -28,6 +30,7 @@ public class DefaultGelfMessageFactory implements GelfMessageFactory{
         fullPatternLayout.start();
     }
 
+    @Override
     public GelfMessage createMessage(GelfAppender appender, ILoggingEvent event) {
         GelfMessage message = new GelfMessage()
                 .setTimestampMillis(event.getTimeStamp());

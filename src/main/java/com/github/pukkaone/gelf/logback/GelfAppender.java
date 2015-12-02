@@ -2,12 +2,8 @@ package com.github.pukkaone.gelf.logback;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import com.github.pukkaone.gelf.protocol.GelfAMQPSender;
-import com.github.pukkaone.gelf.protocol.GelfMessage;
-import com.github.pukkaone.gelf.protocol.GelfSSLSender;
-import com.github.pukkaone.gelf.protocol.GelfSender;
-import com.github.pukkaone.gelf.protocol.GelfTCPSender;
-import com.github.pukkaone.gelf.protocol.GelfUDPSender;
+import com.github.pukkaone.gelf.protocol.*;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -211,6 +207,11 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
         return new GelfTCPSender(graylogHost, graylogPort);
     }
 
+    private GelfHTTPSender getGelfHTTPSender(String graylogUrl)
+            throws IOException {
+        return new GelfHTTPSender(graylogUrl);
+    }
+
     private GelfSSLSender getGelfSSLSender(
             String graylogHost, int graylogPort, boolean sslTrustAllCertificates)
         throws IOException
@@ -246,6 +247,8 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
             } else if (graylogHost != null && graylogHost.startsWith("tcp:")) {
                 String tcpGraylogHost = graylogHost.substring(4);
                 gelfSender = getGelfTCPSender(tcpGraylogHost, graylogPort);
+            } else if (graylogHost != null && graylogHost.startsWith("http:")) {
+                gelfSender = getGelfHTTPSender(graylogHost);
             } else if (graylogHost != null && graylogHost.startsWith("udp:")) {
                 String udpGraylogHost = graylogHost.substring(4);
                 gelfSender = getGelfUDPSender(udpGraylogHost, graylogPort);
