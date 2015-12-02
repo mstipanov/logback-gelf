@@ -29,6 +29,8 @@ dependencies {
     compile "ch.qos.logback:logback-classic:0.9.17"
     compile "com.fasterxml.jackson.core:jackson-databind:2.3.0"
     compile "com.rabbitmq:amqp-client:3.0.4"
+    compile "com.ning:async-http-client:1.9.31"
+    compile "io.netty:netty:3.10.5.Final"
     testCompile 'junit:junit:4.11'
     testCompile 'org.mockito:mockito-all:1.9.5'
 }
