@@ -37,6 +37,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private boolean sslTrustAllCertificates;
     private GelfMessageFactory marshaller = new DefaultGelfMessageFactory();
     private GelfSender gelfSender;
+    private int nettyThreadCount = 1;
 
     public String getGraylogHost() {
         return graylogHost;
@@ -195,6 +196,14 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
         this.marshaller = marshaller;
     }
 
+    public int getNettyThreadCount() {
+        return nettyThreadCount;
+    }
+
+    public void setNettyThreadCount(int nettyThreadCount) {
+        this.nettyThreadCount = nettyThreadCount;
+    }
+
     private GelfUDPSender getGelfUDPSender(String graylogHost, int graylogPort)
         throws IOException
     {
@@ -205,6 +214,12 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
         throws IOException
     {
         return new GelfTCPSender(graylogHost, graylogPort);
+    }
+
+    private GelfNettyTCPSender getGelfNettyTCPSender(String graylogHost, int graylogPort)
+        throws IOException
+    {
+        return new GelfNettyTCPSender(getNettyThreadCount(), graylogHost, graylogPort);
     }
 
     private GelfHTTPSender getGelfHTTPSender(String graylogUrl)
@@ -247,6 +262,9 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
             } else if (graylogHost != null && graylogHost.startsWith("tcp:")) {
                 String tcpGraylogHost = graylogHost.substring(4);
                 gelfSender = getGelfTCPSender(tcpGraylogHost, graylogPort);
+            } else if (graylogHost != null && graylogHost.startsWith("ntcp:")) {
+                String tcpGraylogHost = graylogHost.substring(5);
+                gelfSender = getGelfNettyTCPSender(tcpGraylogHost, graylogPort);
             } else if (graylogHost != null && graylogHost.startsWith("http:")) {
                 gelfSender = getGelfHTTPSender(graylogHost);
             } else if (graylogHost != null && graylogHost.startsWith("udp:")) {
