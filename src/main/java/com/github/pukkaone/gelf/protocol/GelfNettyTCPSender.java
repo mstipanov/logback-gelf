@@ -29,7 +29,7 @@ public class GelfNettyTCPSender extends GelfSender {
     private AtomicLong offerredCount = new AtomicLong(0);
     private AtomicLong completedCount = new AtomicLong(0);
 
-    public GelfNettyTCPSender(int nThreads, int maxConnections, String host, int port) throws IOException {
+    public GelfNettyTCPSender(int nThreads, final int maxConnections, String host, int port) throws IOException {
         EventLoopGroup group = new NioEventLoopGroup(nThreads);
         final Bootstrap cb = new Bootstrap()
                 .option(ChannelOption.SO_KEEPALIVE, true)
