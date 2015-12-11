@@ -298,7 +298,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
         super.start();
     }
 
-    protected GelfSender getGelfSender() {
+    public GelfSender getGelfSender() {
         return gelfSender;
     }
 

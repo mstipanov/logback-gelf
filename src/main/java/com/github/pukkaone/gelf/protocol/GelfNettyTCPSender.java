@@ -1,6 +1,7 @@
 package com.github.pukkaone.gelf.protocol;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -9,6 +10,7 @@ import io.netty.channel.pool.AbstractChannelPoolHandler;
 import io.netty.channel.pool.AbstractChannelPoolMap;
 import io.netty.channel.pool.SimpleChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.internal.ConcurrentSet;
@@ -86,9 +88,7 @@ public class GelfNettyTCPSender extends GelfSender {
                     if (f.isSuccess()) {
                         try {
                             Channel ch = f.getNow();
-                            ch.write(message.toJson());
-                            ch.writeAndFlush('\0');
-
+                            ch.writeAndFlush(Unpooled.copiedBuffer(message.toJson() + '\0', CharsetUtil.UTF_8));
                             // Release back to pool
                             pool.release(ch);
                         } finally {
