@@ -10,17 +10,21 @@ import io.netty.channel.pool.AbstractChannelPoolMap;
 import io.netty.channel.pool.SimpleChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 import io.netty.util.internal.ConcurrentSet;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class GelfNettyTCPSender extends GelfSender {
     private final AbstractChannelPoolMap<InetSocketAddress, SimpleChannelPool> poolMap;
     private final InetSocketAddress address;
     private boolean shutdown;
     private Set<String> usedChannels = new ConcurrentSet<>();
+    private AtomicLong offerredCount = new AtomicLong(0);
+    private AtomicLong completedCount = new AtomicLong(0);
 
     public GelfNettyTCPSender(int nThreads, String host, int port) throws IOException {
         EventLoopGroup group = new NioEventLoopGroup(nThreads);
@@ -75,15 +79,40 @@ public class GelfNettyTCPSender extends GelfSender {
         try {
             final SimpleChannelPool pool = poolMap.get(address);
             Future<Channel> f = pool.acquire();
-            Channel ch = f.syncUninterruptibly().getNow();
-            ch.write(message.toJson());
-            ch.writeAndFlush('\0');
-            // Release back to pool
-            pool.release(ch);
+            offerredCount.incrementAndGet();
+            f.addListener(new FutureListener<Channel>() {
+                @Override
+                public void operationComplete(Future<Channel> f) {
+                    if (f.isSuccess()) {
+                        try {
+                            Channel ch = f.getNow();
+                            ch.write(message.toJson());
+                            ch.writeAndFlush('\0');
+
+                            // Release back to pool
+                            pool.release(ch);
+                        } finally {
+                            completedCount.incrementAndGet();
+                        }
+                    }
+                }
+            });
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public long getOfferredCount() {
+        return offerredCount.longValue();
+    }
+
+    public long getCompletedCount() {
+        return completedCount.longValue();
+    }
+
+    public long getPendingCount() {
+        return getOfferredCount() - getCompletedCount();
     }
 
     @Override
