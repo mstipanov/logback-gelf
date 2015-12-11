@@ -38,6 +38,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private GelfMessageFactory marshaller = new DefaultGelfMessageFactory();
     private GelfSender gelfSender;
     private int nettyThreadCount = 1;
+    private int nettyMaxConnections = 10;
 
     public String getGraylogHost() {
         return graylogHost;
@@ -204,6 +205,14 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
         this.nettyThreadCount = nettyThreadCount;
     }
 
+    public int getNettyMaxConnections() {
+        return nettyMaxConnections;
+    }
+
+    public void setNettyMaxConnections(int nettyMaxConnections) {
+        this.nettyMaxConnections = nettyMaxConnections;
+    }
+
     private GelfUDPSender getGelfUDPSender(String graylogHost, int graylogPort)
         throws IOException
     {
@@ -219,7 +228,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private GelfNettyTCPSender getGelfNettyTCPSender(String graylogHost, int graylogPort)
         throws IOException
     {
-        return new GelfNettyTCPSender(getNettyThreadCount(), graylogHost, graylogPort);
+        return new GelfNettyTCPSender(getNettyThreadCount(), getNettyMaxConnections(), graylogHost, graylogPort);
     }
 
     private GelfHTTPSender getGelfHTTPSender(String graylogUrl)

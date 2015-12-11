@@ -8,6 +8,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.AbstractChannelPoolHandler;
 import io.netty.channel.pool.AbstractChannelPoolMap;
+import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.pool.SimpleChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.CharsetUtil;
@@ -28,7 +29,7 @@ public class GelfNettyTCPSender extends GelfSender {
     private AtomicLong offerredCount = new AtomicLong(0);
     private AtomicLong completedCount = new AtomicLong(0);
 
-    public GelfNettyTCPSender(int nThreads, String host, int port) throws IOException {
+    public GelfNettyTCPSender(int nThreads, int maxConnections, String host, int port) throws IOException {
         EventLoopGroup group = new NioEventLoopGroup(nThreads);
         final Bootstrap cb = new Bootstrap()
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -39,7 +40,7 @@ public class GelfNettyTCPSender extends GelfSender {
         poolMap = new AbstractChannelPoolMap<InetSocketAddress, SimpleChannelPool>() {
             @Override
             protected SimpleChannelPool newPool(InetSocketAddress key) {
-                return new SimpleChannelPool(cb.remoteAddress(key), new AbstractChannelPoolHandler() {
+                return new FixedChannelPool(cb.remoteAddress(key), new AbstractChannelPoolHandler() {
                     @Override
                     public void channelCreated(Channel ch) throws Exception {
                         if (usedChannels.size() < 1000) {
@@ -57,7 +58,7 @@ public class GelfNettyTCPSender extends GelfSender {
                     public void channelAcquired(Channel ch) throws Exception {
 //                        System.out.println("Channel acquired: " + ch);
                     }
-                });
+                }, maxConnections);
             }
         };
 

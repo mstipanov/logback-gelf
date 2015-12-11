@@ -39,7 +39,7 @@ dependencies {
 // Gets version from tag.
 def readVersion() {
     def output = new ByteArrayOutputStream()
-    def version = "1.3.4-infobip"
+    def version = "1.3.5-infobip"
     println "Version ${version}"
     return version
 }
