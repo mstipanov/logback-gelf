@@ -274,7 +274,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
             } else if (graylogHost != null && graylogHost.startsWith("ntcp:")) {
                 String tcpGraylogHost = graylogHost.substring(5);
                 gelfSender = getGelfNettyTCPSender(tcpGraylogHost, graylogPort);
-            } else if (graylogHost != null && graylogHost.startsWith("http:")) {
+            } else if (graylogHost != null && (graylogHost.startsWith("http:") || graylogHost.startsWith("https:"))) {
                 gelfSender = getGelfHTTPSender(graylogHost);
             } else if (graylogHost != null && graylogHost.startsWith("udp:")) {
                 String udpGraylogHost = graylogHost.substring(4);
