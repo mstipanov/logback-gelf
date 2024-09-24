@@ -27,7 +27,7 @@ public class GelfHTTPSender extends GelfSender {
         }
 
         try {
-            getAsyncHttpClient().preparePost(url).setBody(message.toJson()).addHeader("Content-Type", "application/json").setBodyEncoding(StandardCharsets.UTF_8.name()).execute(new AsyncCompletionHandler<Object>() {
+            getAsyncHttpClient().preparePost(url).setBody("[" + message.toJson() + "]").addHeader("Content-Type", "application/json").setBodyEncoding(StandardCharsets.UTF_8.name()).execute(new AsyncCompletionHandler<Object>() {
                 @Override
                 public Object onCompleted(Response response) throws Exception {
                     //TODO log on error!
